@@ -7,7 +7,7 @@
 
 """
 #%% 
-import sys
+import sys, os
 import torch
 # print(torch.__version__)
 import numpy as np
@@ -33,6 +33,7 @@ def binary_encode(x):
 
 #%% Define model architecture, train and save model
 def train_model(filepath):
+  repo_path = os.path.dirname(os.path.abspath(__file__))
   x_train = list(np.arange(101, 1001))
   y_train = Variable(torch.tensor(list(map(lambda x: fizzbuzz(x), x_train))))
   x_train = Variable(torch.tensor(binary_encode(x_train), dtype=torch.float32))
@@ -78,11 +79,13 @@ def train_model(filepath):
   print ([output_labels(i, x) for i, x in zip(xt, preds)])
   print('Accuracy:' , accuracy_score(preds, y_test))
 
-  torch.save(model, 'model/fizzbuzz_trained')
-  print('Saved trained model to: model/fizzbuzz_trained')
+  torch.save(model, repo_path + '/model/fizzbuzz_trained')
+  print('Saved trained model to:', repo_path + '/model/fizzbuzz_trained')
+
 #%% Load saved model for inference.
 def test_model(filepath):
-  model = torch.load('model/fizzbuzz_trained')
+  repo_path = os.path.dirname(os.path.abspath(__file__))
+  model = torch.load(repo_path + '/model/fizzbuzz_trained')
   x = list(map(int, open(filepath).read().split()))
   y_test = list(map(lambda xx: fizzbuzz(xx), x))
   y_test = [output_labels(i, y) for i, y in zip(x, y_test)]
@@ -92,12 +95,12 @@ def test_model(filepath):
   preds = torch.argmax(preds, axis=1)
   outputs = [output_labels(i, y) for i, y in zip(x, preds)]
 
-  with open('Software1.txt', 'w') as f:
+  with open(repo_path + '/Software1.txt', 'w') as f:
     # f.write('\n'.join(map(str, y_test)))
     for y in y_test:
       f.write(f'{str(y)}\n')
 
-  with open('Software2.txt', 'w') as f:
+  with open(repo_path + '/Software2.txt', 'w') as f:
     # f.write('\n'.join(map(str, outputs)))
     for o in outputs:
       f.write(f'{str(o)}\n')
