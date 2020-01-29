@@ -13,6 +13,7 @@ import torch
 import numpy as np
 from torch.autograd import Variable
 from sklearn.metrics import accuracy_score
+from sklearn.model_selection import train_test_split
 torch.manual_seed(111)
 np.random.seed(111)
 
@@ -34,13 +35,20 @@ def binary_encode(x):
 #%% Define model architecture, train and save model
 def train_model(filepath):
   repo_path = os.path.dirname(os.path.abspath(__file__))
-  x_train = list(np.arange(101, 1001))
-  y_train = Variable(torch.tensor(list(map(lambda x: fizzbuzz(x), x_train))))
-  x_train = Variable(torch.tensor(binary_encode(x_train), dtype=torch.float32))
+  xt1 = list(np.arange(101, 1001))
+  yt1 = list(map(lambda x: fizzbuzz(x), xt1))
+  
+  # split data for validation set
+  # xt1, xt2, yt1, yt2 = train_test_split(xt1, yt1, test_size=0.1, random_state=111)
+  x_train = Variable(torch.tensor(binary_encode(xt1), dtype=torch.float32))
+  y_train = Variable(torch.tensor(yt1))
+  # x_test = Variable(torch.tensor(binary_encode(xt2), dtype=torch.float32))
+  # y_test = Variable(torch.tensor(yt2))
 
-  xt =  list(np.arange(1, 101))
-  y_test = Variable(torch.tensor(list(map(lambda x: fizzbuzz(x), xt))))
-  x_test = Variable(torch.tensor(binary_encode(xt), dtype=torch.float32))
+  # Train on whole dataset and check test error at the end.
+  xt2 =  list(np.arange(1, 101))
+  y_test = Variable(torch.tensor(list(map(lambda x: fizzbuzz(x), xt2))))
+  x_test = Variable(torch.tensor(binary_encode(xt2), dtype=torch.float32))
 
   # print(y_train.shape)
   # print(x_train.shape)
@@ -76,7 +84,7 @@ def train_model(filepath):
 
   preds = model(x_test)
   preds = torch.argmax(preds, axis=1)
-  print ([output_labels(i, x) for i, x in zip(xt, preds)])
+  print ([output_labels(i, x) for i, x in zip(xt2, preds)])
   print('Accuracy:' , accuracy_score(preds, y_test))
 
   torch.save(model, repo_path + '/model/fizzbuzz_trained')
